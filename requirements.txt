@@ -1,0 +1,5 @@
+flask
+pandas
+matplotlib
+emoji==2.10.0
+urlextract

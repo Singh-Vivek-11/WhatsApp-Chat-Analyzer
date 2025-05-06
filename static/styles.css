@@ -1,0 +1,29 @@
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .analysis-container {
+    margin-top: 40px;
+    margin-bottom: 60px;
+  }
+  
+  .header-illustration img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 30px auto;
+  }
+  
+  .card-title i {
+    color: #28a745;
+  }
+  
+  .chart-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin-top: 30px;
+  }
+  

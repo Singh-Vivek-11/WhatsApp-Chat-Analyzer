@@ -1,0 +1,252 @@
+export default async function server(request: Request): Promise<Response> {
+    return new Response(`
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>WhatsApp Chat Analyzer</title>
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+      <!-- Chart.js -->
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <style>
+          body {
+              background-color: #f4f6f9;
+          }
+          .analysis-container {
+              max-width: 800px;
+              margin: 50px auto;
+              background-color: white;
+              padding: 30px;
+              border-radius: 10px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
+          #loading {
+              display: none;
+          }
+          .chart-container {
+              margin-top: 20px;
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container analysis-container">
+          <div id="upload-section">
+              <h1 class="text-center mb-4">📊 WhatsApp Chat Analyzer</h1>
+              <form id="chatForm">
+                  <div class="mb-3">
+                      <label for="chatFile" class="form-label">Select WhatsApp Chat Export (.txt)</label>
+                      <input 
+                          class="form-control" 
+                          type="file" 
+                          id="chatFile" 
+                          accept=".txt" 
+                          required
+                      >
+                      <div id="fileNameDisplay" class="form-text mt-2"></div>
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                      Analyze Chat
+                  </button>
+              </form>
+              <div id="loading" class="text-center mt-3">
+                  <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p>Analyzing your chat...</p>
+              </div>
+          </div>
+  
+          <div id="results-section" style="display:none;">
+              <h2 class="text-center mb-4">📈 Chat Analysis Results</h2>
+              
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="card mb-3">
+                          <div class="card-body">
+                              <h5 class="card-title">Quick Stats</h5>
+                              <ul class="list-group" id="statsContainer">
+                                  <li class="list-group-item">📝 Total Messages: <span id="totalMessages">0</span></li>
+                                  <li class="list-group-item">📖 Total Words: <span id="totalWords">0</span></li>
+                                  <li class="list-group-item">📷 Media Shared: <span id="mediaShared">0</span></li>
+                                  <li class="list-group-item">🔗 Links Shared: <span id="linksShared">0</span></li>
+                              </ul>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="card mb-3">
+                          <div class="card-body">
+                              <h5 class="card-title">Top Participants</h5>
+                              <ul class="list-group" id="participantsContainer"></ul>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+  
+              <div class="chart-container">
+                  <canvas id="wordsChart"></canvas>
+              </div>
+              
+              <div class="chart-container">
+                  <canvas id="emojiChart"></canvas>
+              </div>
+  
+              <div class="text-center mt-3">
+                  <button id="resetBtn" class="btn btn-secondary">
+                      🔙 Analyze Another Chat
+                  </button>
+              </div>
+          </div>
+      </div>
+  
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+      
+      <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              const chatForm = document.getElementById('chatForm');
+              const chatFile = document.getElementById('chatFile');
+              const fileNameDisplay = document.getElementById('fileNameDisplay');
+              const loadingIndicator = document.getElementById('loading');
+              const uploadSection = document.getElementById('upload-section');
+              const resultsSection = document.getElementById('results-section');
+              const resetBtn = document.getElementById('resetBtn');
+  
+              // File selection handler
+              chatFile.addEventListener('change', function(e) {
+                  const file = e.target.files[0];
+                  fileNameDisplay.textContent = file ? `Selected: ${file.name}` : '';
+              });
+  
+              // Chat analysis function
+              function analyzeWhatsAppChat(fileContent) {
+                  const lines = fileContent.split('\n');
+                  
+                  // Basic chat analysis
+                  const messagePattern = /^\d{1,2}\/\d{1,2}\/\d{2,4},\s\d{1,2}:\d{2}\s-\s/;
+                  const totalMessages = lines.filter(line => messagePattern.test(line)).length;
+                  
+                  const words = fileContent.toLowerCase().match(/\b\w+\b/g) || [];
+                  const totalWords = words.length;
+                  
+                  const mediaShared = lines.filter(line => line.includes('<Media omitted>')).length;
+                  const linksShared = (fileContent.match(/https?:\/\/\S+/g) || []).length;
+  
+                  // Word frequency
+                  const wordFrequency = words.reduce((acc, word) => {
+                      if (word.length > 2 && !['the', 'and', 'was', 'for', 'are'].includes(word)) {
+                          acc[word] = (acc[word] || 0) + 1;
+                      }
+                      return acc;
+                  }, {});
+  
+                  const topWords = Object.entries(wordFrequency)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 10);
+  
+                  // Emoji analysis
+                  const emojis = fileContent.match(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu) || [];
+                  const emojiFrequency = emojis.reduce((acc, emoji) => {
+                      acc[emoji] = (acc[emoji] || 0) + 1;
+                      return acc;
+                  }, {});
+  
+                  const topEmojis = Object.entries(emojiFrequency)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 5);
+  
+                  return {
+                      stats: [totalMessages, totalWords, mediaShared, linksShared],
+                      words: topWords,
+                      emojis: topEmojis
+                  };
+              }
+  
+              // Form submission handler
+              chatForm.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  const file = chatFile.files[0];
+                  
+                  if (!file) return;
+  
+                  loadingIndicator.style.display = 'block';
+                  uploadSection.style.opacity = '0.5';
+                  chatForm.querySelector('button').disabled = true;
+  
+                  const reader = new FileReader();
+                  reader.onload = function(e) {
+                      try {
+                          const fileContent = e.target.result;
+                          const result = analyzeWhatsAppChat(fileContent);
+  
+                          // Update stats
+                          document.getElementById('totalMessages').textContent = result.stats[0];
+                          document.getElementById('totalWords').textContent = result.stats[1];
+                          document.getElementById('mediaShared').textContent = result.stats[2];
+                          document.getElementById('linksShared').textContent = result.stats[3];
+  
+                          // Words Chart
+                          new Chart(document.getElementById('wordsChart'), {
+                              type: 'bar',
+                              data: {
+                                  labels: result.words.map(w => w[0]),
+                                  datasets: [{
+                                      label: 'Word Frequency',
+                                      data: result.words.map(w => w[1]),
+                                      backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                                  }]
+                              }
+                          });
+  
+                          // Emoji Chart
+                          new Chart(document.getElementById('emojiChart'), {
+                              type: 'pie',
+                              data: {
+                                  labels: result.emojis.map(e => e[0]),
+                                  datasets: [{
+                                      data: result.emojis.map(e => e[1]),
+                                      backgroundColor: [
+                                          'rgba(255, 99, 132, 0.6)',
+                                          'rgba(54, 162, 235, 0.6)',
+                                          'rgba(255, 206, 86, 0.6)',
+                                          'rgba(75, 192, 192, 0.6)',
+                                          'rgba(153, 102, 255, 0.6)'
+                                      ]
+                                  }]
+                              }
+                          });
+  
+                          loadingIndicator.style.display = 'none';
+                          uploadSection.style.display = 'none';
+                          resultsSection.style.display = 'block';
+                      } catch (error) {
+                          alert('Error analyzing chat: ' + error.message);
+                          loadingIndicator.style.display = 'none';
+                          uploadSection.style.opacity = '1';
+                          chatForm.querySelector('button').disabled = false;
+                      }
+                  };
+                  reader.readAsText(file);
+              });
+  
+              // Reset functionality
+              resetBtn.addEventListener('click', function() {
+                  chatFile.value = '';
+                  fileNameDisplay.textContent = '';
+                  resultsSection.style.display = 'none';
+                  uploadSection.style.display = 'block';
+                  uploadSection.style.opacity = '1';
+                  chatForm.querySelector('button').disabled = false;
+              });
+          });
+      </script>
+  </body>
+  </html>
+    `, {
+      headers: {
+        "content-type": "text/html",
+      },
+    });
+  }

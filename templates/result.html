@@ -1,0 +1,104 @@
+:root {
+    --primary-color: #25D366;
+    --secondary-color: #075E54;
+    --light-color: #DCF8C6;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--light-color) 0%, #f0f2f5 100%);
+}
+
+.analysis-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-top: 50px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.analysis-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(37, 211, 102, 0.05);
+    transform: rotate(-45deg);
+    z-index: -1;
+}
+
+.header-illustration {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-illustration img {
+    max-width: 200px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+#chatFile {
+    border: 2px dashed var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+#chatFile:hover {
+    background-color: rgba(37, 211, 102, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--secondary-color);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 17px rgba(0,0,0,0.2);
+}
+
+#loading {
+    display: none;
+    color: var(--secondary-color);
+}
+
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: rgba(37, 211, 102, 0.05);
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .analysis-container {
+        margin-top: 20px;
+        padding: 15px;
+    }
+}
