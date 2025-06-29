@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Group Chat Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Group Chat Analyzer</h1>
+        <p class="instructions">
+            Export your WhatsApp group chat (without media) and upload the .txt file here.
+            <br>To export: Open WhatsApp → Group → More → Export chat (without media)
+        </p>
+        
+        <div class="upload-section">
+            <input type="file" id="chatFile" accept=".txt">
+            <button id="analyzeBtn">Analyze Chat</button>
+        </div>
+        
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing your chat...</p>
+        </div>
+        
+        <div id="results" class="hidden">
+            <div class="summary-section">
+                <h2>Chat Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Total Messages</h3>
+                        <p id="totalMessages">-</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Participants</h3>
+                        <p id="totalParticipants">-</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Duration</h3>
+                        <p id="duration">-</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Media Shared</h3>
+                        <p id="mediaShared">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h2>Message Distribution</h2>
+                <div class="chart-container">
+                    <img id="messagesChart" class="chart-img" alt="Messages per Participant">
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h2>Activity by Hour</h2>
+                <div class="chart-container">
+                    <img id="hoursChart" class="chart-img" alt="Activity by Hour">
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h2>Activity by Day</h2>
+                <div class="chart-container">
+                    <img id="daysChart" class="chart-img" alt="Activity by Day">
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <h2>Media Shared</h2>
+                <div class="chart-container">
+                    <img id="mediaChart" class="chart-img" alt="Media Shared">
+                </div>
+            </div>
+            
+            <div class="emoji-section">
+                <h2>Top Emojis</h2>
+                <div id="emojisContainer" class="emojis-container"></div>
+            </div>
+        </div>
+        
+        <div id="error" class="hidden error-message"></div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
